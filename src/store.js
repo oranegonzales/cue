@@ -1,44 +1,80 @@
-// Simple JSON-file settings store (avoids native modules so `npm install` stays clean).
 const fs = require('fs');
 const path = require('path');
-const { app } = require('electron');
-
-const FILE = path.join(app.getPath('userData'), 'cue-data.json');
-
-const DEFAULTS = {
-  provider: 'openai',
-  smart: false,
-  apiKeys: { openai: '', anthropic: '', gemini: '', deepgram: '' },
-  models: {
-    openai: { fast: 'gpt-4o-mini', smart: 'gpt-4o' },
-    anthropic: { fast: 'claude-3-5-haiku-latest', smart: 'claude-3-5-sonnet-latest' },
-    gemini: { fast: 'gemini-1.5-flash', smart: 'gemini-1.5-pro' }
-  }
-};
+const { app, safeStorage } = require('electron');
+const { PROVIDERS, DEFAULTS, applyPatch, clone } = require('./settings');
 
 let data = null;
+let encryptionAvailable = false;
 
-function deepMerge(base, over) {
-  const out = Array.isArray(base) ? base.slice() : { ...base };
-  for (const k of Object.keys(over || {})) {
-    if (over[k] && typeof over[k] === 'object' && !Array.isArray(over[k]) && typeof base[k] === 'object') {
-      out[k] = deepMerge(base[k], over[k]);
-    } else {
-      out[k] = over[k];
+function filePath() {
+  return path.join(app.getPath('userData'), 'cue-data.json');
+}
+
+async function decryptKeys(protectedKeys) {
+  const keys = clone(DEFAULTS.apiKeys);
+  if (!encryptionAvailable || !protectedKeys || typeof protectedKeys !== 'object') return keys;
+  for (const provider of PROVIDERS) {
+    const encoded = protectedKeys[provider];
+    if (typeof encoded !== 'string' || !encoded) continue;
+    try {
+      const decrypted = await safeStorage.decryptStringAsync(Buffer.from(encoded, 'base64'));
+      keys[provider] = typeof decrypted.result === 'string' ? decrypted.result.slice(0, 10000).trim() : '';
+    } catch {
+      keys[provider] = '';
     }
   }
-  return out;
+  return keys;
 }
 
-function load() {
-  if (data) return data;
-  try { data = deepMerge(DEFAULTS, JSON.parse(fs.readFileSync(FILE, 'utf8'))); }
-  catch { data = deepMerge(DEFAULTS, {}); }
-  return data;
+async function serialize() {
+  const output = clone(data);
+  const keys = output.apiKeys;
+  delete output.apiKeys;
+  if (encryptionAvailable) {
+    output.protectedApiKeys = {};
+    for (const provider of PROVIDERS) {
+      if (!keys[provider]) continue;
+      const encrypted = await safeStorage.encryptStringAsync(keys[provider]);
+      output.protectedApiKeys[provider] = encrypted.toString('base64');
+    }
+  } else {
+    output.apiKeys = keys;
+  }
+  return output;
 }
-function save() { try { fs.writeFileSync(FILE, JSON.stringify(data, null, 2)); } catch (e) { /* ignore */ } }
 
-module.exports = {
-  getSettings() { return load(); },
-  setSettings(patch) { load(); data = deepMerge(data, patch || {}); save(); return data; }
-};
+async function save() {
+  const output = await serialize();
+  await fs.promises.mkdir(path.dirname(filePath()), { recursive: true });
+  await fs.promises.writeFile(filePath(), JSON.stringify(output, null, 2), { encoding: 'utf8', mode: 0o600 });
+}
+
+async function init() {
+  if (data) return;
+  encryptionAvailable = await safeStorage.isAsyncEncryptionAvailable();
+  let raw = {};
+  try {
+    raw = JSON.parse(await fs.promises.readFile(filePath(), 'utf8'));
+  } catch {
+    raw = {};
+  }
+  const protectedKeys = await decryptKeys(raw.protectedApiKeys);
+  const legacyKeys = raw.apiKeys && typeof raw.apiKeys === 'object' ? raw.apiKeys : {};
+  const keys = encryptionAvailable && raw.protectedApiKeys ? protectedKeys : legacyKeys;
+  data = applyPatch(DEFAULTS, { ...raw, apiKeys: keys });
+  if (encryptionAvailable && raw.apiKeys) await save();
+}
+
+async function getSettings() {
+  await init();
+  return { ...clone(data), keyStorage: encryptionAvailable ? 'protected' : 'plain' };
+}
+
+async function setSettings(patch) {
+  await init();
+  data = applyPatch(data, patch);
+  await save();
+  return getSettings();
+}
+
+module.exports = { init, getSettings, setSettings };
