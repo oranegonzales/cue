@@ -1,123 +1,141 @@
 <div align="center">
 
-# cue for Windows 11
+# Cue for Windows 11
 
-**A Windows 11 AI overlay with screen context, microphone input, and system-audio loopback.**
+**A Windows-first AI desktop overlay with screen context, microphone transcription, and system-audio listening.**
 
-<img src="docs/overlay.png" width="620" alt="cue overlay" />
+<img src="docs/overlay.png" width="620" alt="Cue running as a Windows 11 desktop overlay" />
 
 </div>
 
 > [!NOTE]
-> This is a modified Windows 11 version of [Blueturboguy07/cue](https://github.com/Blueturboguy07/cue). The Windows port was started on July 16, 2026. It remains licensed under GPL-3.0-or-later.
+> This repository is the Windows 11 edition of Cue. It is based on the original macOS project by [Blueturboguy07](https://github.com/Blueturboguy07/cue), but the application, instructions, shortcuts, audio capture, security, installer, and build workflow in this repository are designed for Windows 11.
 
 > [!IMPORTANT]
-> Screen-share exclusion is best effort. Electron asks Windows to exclude cue through `WDA_EXCLUDEFROMCAPTURE`, but a capture tool, operating-system update, or capture mode may ignore that request or display a blank area. Test your exact setup before sharing. Do not use hidden assistance during an exam, interview, meeting, or recording where it breaks rules, consent requirements, or applicable law.
+> Screen-capture exclusion is best effort. Windows or individual capture applications may ignore the protection request or display a blank area. Test your exact setup before sharing or recording. Use Cue only where assistance and recording are permitted.
 
-## Windows features
+## Windows 11 features
 
-| Feature | Windows 11 implementation |
+| Feature | Windows implementation |
 |---|---|
-| Floating overlay | Transparent, always-on-top Electron window |
-| Screen context | Captures the display under the mouse pointer |
-| Your voice | Windows microphone through `getUserMedia` |
-| Meeting audio | Windows system-audio loopback through Electron |
-| Capture protection | Electron `setContentProtection(true)` |
-| Local key security | Windows DPAPI through Electron `safeStorage` |
-| Installer | Per-user NSIS installer with no administrator requirement |
-| Portable build | ZIP archive containing the unpacked x64 app |
+| Desktop overlay | Transparent, movable, always-on-top Electron window |
+| Screen context | Captures the Windows display under the mouse pointer |
+| Your voice | Captures the selected Windows microphone |
+| Meeting audio | Captures Windows system output through loopback audio |
+| Zoom support | Separates microphone speech from audio played by Zoom |
+| Capture protection | Requests Windows display-affinity protection through Electron |
+| API-key protection | Encrypts saved keys with Windows DPAPI through Electron safeStorage |
+| Installer | Per-user NSIS installation with selectable installation folder |
+| Portable version | ZIP package containing the unpacked x64 application |
+| Windows build automation | Tests and packages the application on a Windows GitHub Actions runner |
 
-## Install from a build artifact
+## Requirements
 
-The Windows workflow produces two x64 files:
+- Windows 11 x64
+- Internet connection
+- A supported provider API key
+- Microphone permission for listening features
+- Node.js 20 or newer only when running from source
 
-- `cue-windows-11-0.2.1-x64.exe` for a normal per-user installation
-- `cue-windows-11-0.2.1-x64.zip` for a portable copy
+## Download and install
 
-The builds are unsigned until a Windows code-signing certificate is configured. Windows SmartScreen may therefore show an unrecognized-app warning. Only run a build from a repository and commit you trust.
+1. Open the [Windows 11 build workflow](https://github.com/oranegonzales/cue/actions/workflows/windows.yml).
+2. Select the newest successful build.
+3. Download the `cue-windows-11-x64` artifact.
+4. Extract the downloaded artifact ZIP.
+5. Run `cue-windows-11-0.2.1-x64.exe` for the normal installer.
 
-## Run from source
+The artifact also contains `cue-windows-11-0.2.1-x64.zip` for portable use.
 
-Install Node.js 20 or newer, then run:
+The installer does not require administrator access. Builds are currently unsigned, so Windows SmartScreen may show an unrecognized-app warning. Only install artifacts produced by this repository and a commit you trust.
 
-```bash
-git clone YOUR_FORK_URL cue
+## First launch
+
+1. Start Cue from the Start menu or desktop shortcut.
+2. Click the Cue logo to open the setup guide.
+3. Press `Ctrl` + `,` to open Settings.
+4. Choose OpenAI, Anthropic, or Gemini and enter your API key.
+5. Allow Windows microphone access when requested.
+6. Test screen analysis and listening before using Cue in a meeting.
+
+Gemini defaults to `gemini-3.1-flash-lite` for fast responses and transcription. Smart mode uses `gemini-3.5-flash`. Saved Gemini 2.5 model settings are migrated automatically.
+
+## Listen to Zoom and other meeting applications
+
+1. Join the meeting using computer audio.
+2. In the meeting application's audio settings, select the same speaker device used under **Windows Settings > System > Sound > Output**.
+3. Click the listening button in Cue's top bar.
+4. Confirm that the green listening indicator appears.
+5. Audio played by the meeting application is recorded as **Them**.
+6. Speech from your microphone is recorded as **You**.
+7. Click **What should I say?** or use Assist after the other person finishes speaking.
+
+Headphones usually produce the cleanest separation. Other sounds played by Windows may also be captured, so mute unrelated applications while listening.
+
+## Windows shortcuts
+
+| Action | Shortcut |
+|---|---|
+| Assist using the current screen and conversation | `Ctrl` + `Enter` |
+| Solve a coding problem visible on screen | `Ctrl` + `Alt` + `H` |
+| Open Settings while Cue has focus | `Ctrl` + `,` |
+| Quit Cue | `Ctrl` + `Shift` + `X` |
+
+Move the mouse onto the monitor containing the relevant content before using a screen shortcut. Cue captures the display under the pointer.
+
+Keep **Smart** off for the quickest response. Turn it on when a more detailed answer is more important than response speed.
+
+## Run from source on Windows
+
+Open PowerShell and run:
+
+```powershell
+git clone https://github.com/oranegonzales/cue.git
 cd cue
-git switch windows-11
 npm ci
 npm start
 ```
 
-Create the Windows 11 installer and ZIP package with:
+Build the Windows installer and portable ZIP with:
 
-```bash
+```powershell
 npm run dist:win
 ```
 
-The files are written to `dist`.
-
-## First launch on Windows 11
-
-1. Open cue.
-2. Click the cue logo to view the setup guide.
-3. Allow microphone access when Windows asks.
-4. If access is blocked, open **Settings > Privacy & security > Microphone** and enable both microphone access and desktop-app access.
-5. Open cue Settings, choose OpenAI, Anthropic, or Gemini, and enter your own API key.
-6. Start listening and play meeting audio to confirm that both microphone and system-audio transcription work.
-7. Test cue with the exact screen-sharing or recording application you plan to use.
-
-## Shortcuts on Windows
-
-| Action | Shortcut |
-|---|---|
-| Assist with the current screen and conversation | `Ctrl` + `Enter` |
-| Solve a coding problem on screen | `Ctrl` + `Alt` + `H` |
-| Open Settings while cue has focus | `Ctrl` + `,` |
-| Quit cue | `Ctrl` + `Shift` + `X` |
-
-`Ctrl` + `Alt` + `H` is used instead of the upstream `Ctrl` + `H` mapping so cue does not replace the common History shortcut in Windows applications.
-
-## How it works
-
-cue keeps three inputs separate:
-
-- Screen: Electron captures the display under the pointer only when a feature needs visual context.
-- Microphone: The renderer captures your microphone and sends short PCM segments to the selected transcription provider.
-- Meeting audio: On Windows, Electron supplies a loopback audio stream for the current system output.
-
-The transcript and optional screenshot are sent directly to the AI provider selected in Settings. cue does not operate an application server or telemetry service.
+The finished files are written to the `dist` folder.
 
 ## Privacy and security
 
-- API keys are encrypted on Windows with DPAPI through Electron `safeStorage`.
-- Legacy plaintext keys are migrated to protected storage after the first successful launch.
-- The renderer runs with context isolation, no Node integration, and process sandboxing.
-- Navigation, popup windows, external settings links, media permissions, and IPC senders are restricted.
-- The packaged application uses an ASAR archive.
-- Screenshots and audio are processed only when the related feature is used.
+- API keys are encrypted for the current Windows user with DPAPI.
+- Legacy plaintext keys are migrated to protected storage after launch.
+- Cue has no application server or telemetry service.
+- Screenshots, audio clips, prompts, and transcripts are sent directly to the selected AI provider when a related feature is used.
+- The renderer uses context isolation, process sandboxing, restricted navigation, restricted IPC, and controlled media permissions.
+- Screenshots and audio are not stored as permanent recordings by Cue.
 
-See [SECURITY.md](SECURITY.md) for the complete security notes.
+See [SECURITY.md](SECURITY.md) for more information.
 
-## Validation
+## Testing
 
-Run the syntax checks and unit tests with:
+Run the local validation suite with:
 
-```bash
+```powershell
 npm test
+npm audit --audit-level=high
 ```
 
-The GitHub Actions workflow runs the tests on a Windows runner and then builds the NSIS installer and ZIP artifact.
+The GitHub Actions workflow repeats the tests on Windows and creates the installer and portable package.
 
 ## Known limitations
 
-- Capture protection cannot be guaranteed across every Windows build and capture application.
-- Unsigned builds may trigger SmartScreen.
-- Windows on Arm builds are supported by `npm run dist:win:arm64`, but the default workflow builds x64.
-- System-audio loopback is enabled only on Windows because Electron documents it as a Windows-only capability.
-- AI-provider access, pricing, model availability, and transcription permissions depend on the user's own account.
+- Screen-capture protection cannot be guaranteed for every Windows update, application, or capture mode.
+- The installer is not yet signed with a commercial Windows code-signing certificate.
+- System-audio loopback captures other audio playing through the selected Windows output device.
+- Changing the Windows output device while listening may require stopping and restarting listening.
+- The default automated build targets Windows 11 x64.
 
-## Upstream and license
+## Origin and license
 
-The original project was created by [Blueturboguy07](https://github.com/Blueturboguy07/cue). This modified version preserves the upstream history and credits.
+This project began as a fork of [Blueturboguy07/cue](https://github.com/Blueturboguy07/cue), which was originally developed for macOS. This repository adapts that project into a Windows 11 application while preserving the upstream history and attribution.
 
-Licensed under [GPL-3.0-or-later](LICENSE). If you distribute a compiled build, provide the corresponding source code and retain the license and modification notices.
+Licensed under [GPL-3.0-or-later](LICENSE). If you distribute a compiled build, retain the license and modification notices and provide the corresponding source code.
