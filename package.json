@@ -1,19 +1,28 @@
 {
-  "name": "cue",
-  "version": "0.1.0",
-  "description": "Open-source macOS invisible AI overlay — three separate inputs (screen, mic, system audio) into an LLM. A Cluely-style copilot for meetings and coding problems.",
+  "name": "cue-windows",
+  "version": "0.2.1",
+  "description": "Windows 11 AI overlay with screen context, microphone input, and system-audio loopback.",
   "license": "GPL-3.0-or-later",
-  "author": "cue",
+  "author": "cue contributors",
   "main": "main.js",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "start": "electron .",
+    "check": "node --check main.js && node --check preload.js && node --check renderer/icons.js && node --check renderer/renderer.js && node --check src/llm.js && node --check src/platform.js && node --check src/prompts.js && node --check src/screen.js && node --check src/settings.js && node --check src/store.js && node --check src/stt.js && node --check src/wav.js",
+    "test": "npm run check && node --test",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder --mac zip"
+    "pack:win": "electron-builder --win dir --x64",
+    "dist:mac": "electron-builder --mac zip",
+    "dist:win": "electron-builder --win nsis zip --x64",
+    "dist:win:arm64": "electron-builder --win nsis zip --arm64"
   },
   "build": {
-    "appId": "com.cue.overlay",
+    "appId": "io.github.oranegonzales.cue.windows",
     "productName": "cue",
-    "asar": false,
+    "asar": true,
+    "artifactName": "cue-windows-11-${version}-${arch}.${ext}",
     "files": [
       "main.js",
       "preload.js",
@@ -22,7 +31,7 @@
     ],
     "mac": {
       "target": [
-        "dir"
+        "zip"
       ],
       "category": "public.app-category.productivity",
       "hardenedRuntime": false,
@@ -32,26 +41,50 @@
         "LSUIElement": true,
         "NSMicrophoneUsageDescription": "cue transcribes your microphone so it can help you in conversations.",
         "NSCameraUsageDescription": "cue does not use the camera.",
-        "NSAudioCaptureUsageDescription": "cue captures system audio to transcribe the other participant in a call."
+        "NSAudioCaptureUsageDescription": "cue captures audio to transcribe a conversation."
       }
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "cue"
     }
   },
   "keywords": [
     "electron",
+    "windows-11",
     "overlay",
     "ai",
     "assistant",
-    "screencapturekit",
-    "macos"
+    "system-audio"
   ],
   "devDependencies": {
-    "electron": "33.2.1",
-    "electron-builder": "^24.13.3"
+    "electron": "43.1.1",
+    "electron-builder": "^26.15.3"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.32.1",
-    "@google/genai": "^0.3.0",
-    "lucide-static": "^0.468.0",
-    "openai": "^4.73.0"
+    "@anthropic-ai/sdk": "^0.111.0",
+    "@google/genai": "^2.12.0",
+    "openai": "^6.47.0"
   }
 }

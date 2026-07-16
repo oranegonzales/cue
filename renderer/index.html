@@ -8,7 +8,6 @@
 </head>
 <body>
   <div id="app">
-    <!-- Top-center floating pill toolbar (drag handle) -->
     <div id="toolbar">
       <button class="tb-logo" id="logo-btn" title="cue"></button>
       <div class="tb-divider"></div>
@@ -17,7 +16,6 @@
       <button class="tb-stop" id="stop-btn" title="Start / stop listening"></button>
     </div>
 
-    <!-- Main assistant panel -->
     <div id="panel-wrap">
       <span id="live-dot" class="off"></span>
       <div id="panel" class="glass no-drag">
@@ -35,7 +33,7 @@
 
         <div id="composer">
           <div id="input-area">
-            <div id="placeholder">Ask about your screen or conversation, or <span class="keycap">⌘</span><span class="keycap">⏎</span> for Assist</div>
+            <div id="placeholder">Ask about your screen or conversation, or <span class="keycap" id="assist-key-mod">Ctrl</span><span class="keycap">Enter</span> for Assist</div>
             <textarea id="input" rows="1" spellcheck="false"></textarea>
           </div>
           <div id="composer-bottom">
@@ -49,7 +47,6 @@
     </div>
   </div>
 
-  <!-- Settings -->
   <div id="settings-scrim" class="hidden">
     <div id="settings" class="glass">
       <div class="s-head">
@@ -64,7 +61,7 @@
           <button data-provider="gemini">Gemini</button>
         </div>
 
-        <label class="s-label">API keys <span class="s-hint">stored locally in cue-data.json</span></label>
+        <label class="s-label">API keys <span class="s-hint">protected by Windows when available</span></label>
         <div class="s-field"><span>OpenAI</span><input id="key-openai" type="password" placeholder="sk-..." autocomplete="off" /></div>
         <div class="s-field"><span>Anthropic</span><input id="key-anthropic" type="password" placeholder="sk-ant-..." autocomplete="off" /></div>
         <div class="s-field"><span>Gemini</span><input id="key-gemini" type="password" placeholder="AIza..." autocomplete="off" /></div>
@@ -78,7 +75,6 @@
     </div>
   </div>
 
-  <!-- First-run tutorial / walkthrough -->
   <div id="onboard-scrim" class="hidden">
     <div id="onboard" class="glass">
       <div class="ob-dots" id="ob-dots"></div>

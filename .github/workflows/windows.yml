@@ -1,0 +1,33 @@
+name: Windows 11 build
+
+on:
+  push:
+    branches:
+      - main
+      - windows-11
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run dist:win
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cue-windows-11-x64
+          path: |
+            dist/cue-windows-11-*.exe
+            dist/cue-windows-11-*.zip
+          if-no-files-found: error
+          retention-days: 14

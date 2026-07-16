@@ -1,184 +1,141 @@
 <div align="center">
 
-# cue
+# Cue for Windows 11
 
-**An open-source AI copilot that floats over your screen — sees what you see, hears your meetings, and stays hidden from screen shares.**
+**A Windows-first AI desktop overlay with screen context, microphone transcription, and system-audio listening.**
 
-A free, self-hosted alternative to Cluely. Bring your own AI key (OpenAI · Anthropic · Google Gemini).
-
-<img src="docs/tutorial.png" width="620" alt="cue first-run tutorial" />
+<img src="docs/overlay.png" width="620" alt="Cue running as a Windows 11 desktop overlay" />
 
 </div>
 
----
+> [!NOTE]
+> This repository is the Windows 11 edition of Cue. It is based on the original macOS project by [Blueturboguy07](https://github.com/Blueturboguy07/cue), but the application, instructions, shortcuts, audio capture, security, installer, and build workflow in this repository are designed for Windows 11.
 
 > [!IMPORTANT]
-> **Please read this first.** cue tries to stay out of screen recordings/shares, but this is **best-effort, not guaranteed** — on macOS 15.4+ Apple can let modern capture tools see it anyway, and a phone camera always can. Using a hidden assistant during a **proctored exam, job interview, or recorded meeting** may break that platform's rules and, in some places, consent laws. cue is built for legitimate uses — your own notes, studying, accessibility, and practice. **You are responsible for how you use it.**
->
-> On Zoom specifically, whether cue is hidden depends on one setting — **Settings → Share Screen → Screen capture mode → "Advanced capture with window filtering."**
->
-> <img src="docs/zoom-capture-mode.png" width="560" alt="Zoom Settings → Share Screen → Screen capture mode set to Advanced capture with window filtering" />
+> Screen-capture exclusion is best effort. Windows or individual capture applications may ignore the protection request or display a blank area. Test your exact setup before sharing or recording. Use Cue only where assistance and recording are permitted.
 
----
+## Windows 11 features
 
-## What it does
+| Feature | Windows implementation |
+|---|---|
+| Desktop overlay | Transparent, movable, always-on-top Electron window |
+| Screen context | Captures the Windows display under the mouse pointer |
+| Your voice | Captures the selected Windows microphone |
+| Meeting audio | Captures Windows system output through loopback audio |
+| Zoom support | Separates microphone speech from audio played by Zoom |
+| Capture protection | Requests Windows display-affinity protection through Electron |
+| API-key protection | Encrypts saved keys with Windows DPAPI through Electron safeStorage |
+| Installer | Per-user NSIS installation with selectable installation folder |
+| Portable version | ZIP package containing the unpacked x64 application |
+| Windows build automation | Tests and packages the application on a Windows GitHub Actions runner |
 
-cue floats a small glass panel on top of everything. It takes **three separate inputs** — your **screen**, your **microphone**, and your **meeting audio** (what the other person says) — and uses an AI model to help you in real time.
+## Requirements
 
-| Feature | How to trigger | What it uses |
-|---|---|---|
-| **Assist** | `⌘` `↵` or the *Assist* button | your screen + recent conversation |
-| **What should I say?** | button | meeting audio + your mic |
-| **Follow-up questions** | button | the whole conversation |
-| **Recap** | button | the whole conversation |
-| **Ask anything** | type + `↵` | your screen + conversation |
-| **Solve a coding problem** | `⌘` `H` | your screen only |
-| **Smart** toggle | pill in the box | switches to a smarter (slower) model |
+- Windows 11 x64
+- Internet connection
+- A supported provider API key
+- Microphone permission for listening features
+- Node.js 20 or newer only when running from source
 
-It's a copilot for **live meetings** ("what do I say to that?") and **coding problems** (screenshot → full solution), and it's designed to be **invisible in screen shares** so it stays your private assistant.
+## Download and install
 
----
+1. Open the [Windows 11 build workflow](https://github.com/oranegonzales/cue/actions/workflows/windows.yml).
+2. Select the newest successful build.
+3. Download the `cue-windows-11-x64` artifact.
+4. Extract the downloaded artifact ZIP.
+5. Run `cue-windows-11-0.2.1-x64.exe` for the normal installer.
 
-## Install
+The artifact also contains `cue-windows-11-0.2.1-x64.zip` for portable use.
 
-There are two ways to install cue. **If you're not a developer, use Option A.**
+The installer does not require administrator access. Builds are currently unsigned, so Windows SmartScreen may show an unrecognized-app warning. Only install artifacts produced by this repository and a commit you trust.
 
-### Option A — Download the app (easiest)
+## First launch
 
-1. Go to the [**Releases**](../../releases) page and download **`cue-mac.zip`**.
-2. Double-click the zip to unzip it. You'll get **`cue.app`**.
-3. Drag **`cue.app`** into your **Applications** folder.
-4. **First open (important):** because cue is a free app without a paid Apple certificate, macOS will refuse to open it normally the first time. Do this once:
-   - **Right-click** `cue.app` → **Open** → click **Open** in the dialog.
-   - If macOS instead says **"cue is damaged and can't be opened,"** open the **Terminal** app and paste this line, then press Return:
-     ```bash
-     xattr -cr /Applications/cue.app
-     ```
-     Then double-click cue.app again. (This just tells macOS "yes, I trust this app I downloaded." It's safe.)
+1. Start Cue from the Start menu or desktop shortcut.
+2. Click the Cue logo to open the setup guide.
+3. Press `Ctrl` + `,` to open Settings.
+4. Choose OpenAI, Anthropic, or Gemini and enter your API key.
+5. Allow Windows microphone access when requested.
+6. Test screen analysis and listening before using Cue in a meeting.
 
-After that, cue opens normally forever.
+Gemini defaults to `gemini-3.1-flash-lite` for fast responses and transcription. Smart mode uses `gemini-3.5-flash`. Saved Gemini 2.5 model settings are migrated automatically.
 
-### Option B — Run from source (developers)
+## Listen to Zoom and other meeting applications
 
-You need [Node.js](https://nodejs.org) 18+ installed. No Xcode required.
+1. Join the meeting using computer audio.
+2. In the meeting application's audio settings, select the same speaker device used under **Windows Settings > System > Sound > Output**.
+3. Click the listening button in Cue's top bar.
+4. Confirm that the green listening indicator appears.
+5. Audio played by the meeting application is recorded as **Them**.
+6. Speech from your microphone is recorded as **You**.
+7. Click **What should I say?** or use Assist after the other person finishes speaking.
 
-```bash
-git clone https://github.com/Blueturboguy07/cue.git
+Headphones usually produce the cleanest separation. Other sounds played by Windows may also be captured, so mute unrelated applications while listening.
+
+## Windows shortcuts
+
+| Action | Shortcut |
+|---|---|
+| Assist using the current screen and conversation | `Ctrl` + `Enter` |
+| Solve a coding problem visible on screen | `Ctrl` + `Alt` + `H` |
+| Open Settings while Cue has focus | `Ctrl` + `,` |
+| Quit Cue | `Ctrl` + `Shift` + `X` |
+
+Move the mouse onto the monitor containing the relevant content before using a screen shortcut. Cue captures the display under the pointer.
+
+Keep **Smart** off for the quickest response. Turn it on when a more detailed answer is more important than response speed.
+
+## Run from source on Windows
+
+Open PowerShell and run:
+
+```powershell
+git clone https://github.com/oranegonzales/cue.git
 cd cue
-npm install
+npm ci
 npm start
 ```
 
-To build your own `cue.app`:
-```bash
-npm run pack      # creates dist/mac-arm64/cue.app
-```
-> Note: the packaged app is **ad-hoc signed** (no paid Apple certificate). macOS ties permission grants to the exact build, so **rebuilding resets the mic/screen permissions** — you'll grant them again. For everyday use, build once and keep it.
+Build the Windows installer and portable ZIP with:
 
----
-
-## First launch — the 1-minute setup
-
-When cue opens the first time, a **built-in tutorial** walks you through everything below. You can reopen it anytime by clicking the **cue logo** (top-left of the pill). Here's the same thing in writing.
-
-### Step 1 — Grant two macOS permissions
-
-cue can't help until macOS lets it see and hear. When you first use a feature, macOS will prompt you — click **Allow**. If a prompt doesn't appear, add cue manually:
-
-- **Microphone:** System Settings → **Privacy & Security** → **Microphone** → turn on **cue**.
-- **Screen Recording:** System Settings → **Privacy & Security** → **Screen Recording** → turn on **cue**. (This one grant covers both screenshots *and* meeting audio.) macOS may ask you to **quit & reopen** cue — let it.
-
-### Step 2 — Add your AI key (bring your own)
-
-cue uses **your own** API key, so it's free to run (you only pay your AI provider for what you use). Click the **`...`** button in the input box (or press `⌘` `,`) to open **Settings**, pick a provider, and paste your key:
-
-| Provider | Get a key | Notes |
-|---|---|---|
-| **OpenAI** | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) | One key does everything — **but** for the *listening* features the key must have **Whisper / audio** access (a "restricted" project key that only allows chat will give a 403 on transcription). |
-| **Anthropic (Claude)** | [console.anthropic.com](https://console.anthropic.com) | Great for screen & coding help. Claude has no speech-to-text, so add an OpenAI or Gemini key too if you want the listening features. |
-| **Google Gemini** | [aistudio.google.com/apikey](https://aistudio.google.com/apikey) | One key does chat + transcription. |
-
-Your key is stored **only on your computer** (in `cue-data.json`) and is sent **only** to that provider. cue has no server and collects nothing.
-
-### Step 3 — The Zoom setting (only needed for Zoom)
-
-cue is hidden from most screen-share tools automatically — **Google Meet, Microsoft Teams, and QuickTime need nothing.** **Zoom** has a specific setting that decides whether it respects cue's "don't capture me" flag:
-
-> **Zoom → Settings → Share Screen → Advanced → Screen capture mode → choose "Advanced capture with window filtering."**
-
-<div align="center"><img src="docs/zoom-setting.png" width="560" alt="Zoom screen capture mode setting" /></div>
-
-**Why:** the *"...with window filtering"* modes tell Zoom to leave out windows that mark themselves as private — which is exactly what cue does. The **"Advanced capture without window filtering"** mode grabs the raw screen and **will show cue**, so avoid it.
-
----
-
-## How to use it
-
-- **`⌘` `↵` — Assist.** The do-the-smart-thing key. On a coding problem it solves it; in a conversation it tells you what to say. Works from anywhere.
-- **`⌘` `H` — Solve what's on screen.** Screenshots a coding problem and returns the approach, code, and time/space complexity.
-- **The `▢` button** (top bar) — start/stop **listening** to a meeting. The green dot means it's live.
-- **Type a question** in the box and press `↵` to ask about your screen or conversation.
-- **Smart** — flip it on for a smarter, more thorough model; off for fast and cheap.
-- **Hide** collapses the panel to just the top bar. Drag cue around by the **top pill**. Quit with `⌘` `⇧` `X`.
-
-The panel is see-through and click-through — the empty space around it never blocks the app behind it.
-
----
-
-## How it works (under the hood)
-
-cue is an [Electron](https://www.electronjs.org/) app. Everything runs locally except the calls to your chosen AI provider.
-
-**The three inputs are kept completely separate:**
-- **Screen** — captured with Electron's `desktopCapturer` (full-resolution screenshots, taken only when a feature needs one).
-- **Your mic ("You")** — `getUserMedia` → downsampled to 16 kHz audio → transcribed.
-- **Meeting audio ("Them")** — `getDisplayMedia` loopback capture of your system's output audio, kept on its own channel so cue knows *who* said what.
-
-Both audio streams are transcribed (OpenAI Whisper or Gemini) and fed, with an optional screenshot, to your AI model. Responses **stream** into the panel word-by-word.
-
-**The invisibility** is a single macOS window flag: `setContentProtection(true)`, which sets `NSWindowSharingNone`. This asks the window server to exclude cue from screen-capture streams. It's the same mechanism DRM apps and Zoom's own toolbar use. It is **not** a GPU trick or a special overlay layer — and on macOS 15.4+ Apple lets some capture tools ignore it, which is why it's best-effort (see the disclaimer at the top).
-
-```
-main process ──┬─ overlay window (frameless, transparent, always-on-top, content-protected)
-               ├─ screenshot capture (desktopCapturer)
-               ├─ speech-to-text (Whisper / Gemini)      ── "You" + "Them" channels
-               └─ LLM streaming (OpenAI / Anthropic / Gemini)
-renderer ──────┴─ the glass UI + mic capture + system-audio loopback
+```powershell
+npm run dist:win
 ```
 
----
+The finished files are written to the `dist` folder.
 
-## Troubleshooting
+## Privacy and security
 
-**"It says give access, but I already gave access."**
-You probably granted an older build. Because the app is ad-hoc signed, a rebuild changes its identity and macOS stops honoring the old grant (the checkmark can linger). Toggle cue **off and on** in System Settings → Screen Recording, or remove and re-add it.
+- API keys are encrypted for the current Windows user with DPAPI.
+- Legacy plaintext keys are migrated to protected storage after launch.
+- Cue has no application server or telemetry service.
+- Screenshots, audio clips, prompts, and transcripts are sent directly to the selected AI provider when a related feature is used.
+- The renderer uses context isolation, process sandboxing, restricted navigation, restricted IPC, and controlled media permissions.
+- Screenshots and audio are not stored as permanent recordings by Cue.
 
-**A feature returns "403" / "no access to model."**
-Your API key is restricted. Most often it's an OpenAI **project key that only allows chat models** — it works for screen/coding help but 403s on transcription (Whisper). Fix: enable audio/Whisper on the key, use an unrestricted key, or add a Gemini key (cue falls back to it for transcription).
+See [SECURITY.md](SECURITY.md) for more information.
 
-**Listening does nothing / no transcript.**
-Check Settings shows a transcription-capable key (OpenAI with Whisper, or Gemini). Also make sure Screen Recording is granted (meeting audio needs it).
+## Testing
 
-**cue shows up in my Zoom share.**
-Set Zoom's **Screen capture mode** to *"Advanced capture with window filtering"* (see Step 3). And remember: on macOS 15.4+ this can still fail — it's best-effort.
+Run the local validation suite with:
 
-**"cue is damaged and can't be opened."**
-Run `xattr -cr /Applications/cue.app` in Terminal once (see Install → Option A).
+```powershell
+npm test
+npm audit --audit-level=high
+```
 
----
+The GitHub Actions workflow repeats the tests on Windows and creates the installer and portable package.
 
-## Privacy
+## Known limitations
 
-- No accounts, no servers, no telemetry. cue collects nothing.
-- Your API keys live in a local file (`cue-data.json`) and are sent only to the provider you chose.
-- Screenshots and audio are sent to your AI provider only when a feature runs, and are not stored by cue beyond the current session's transcript (kept in memory).
+- Screen-capture protection cannot be guaranteed for every Windows update, application, or capture mode.
+- The installer is not yet signed with a commercial Windows code-signing certificate.
+- System-audio loopback captures other audio playing through the selected Windows output device.
+- Changing the Windows output device while listening may require stopping and restarting listening.
+- The default automated build targets Windows 11 x64.
 
-## Contributing
+## Origin and license
 
-Issues and PRs welcome. cue is intentionally small and readable — `main.js` (app + capture + AI), `renderer/` (the UI), `src/` (providers). No build step for the source (plain HTML/CSS/JS).
+This project began as a fork of [Blueturboguy07/cue](https://github.com/Blueturboguy07/cue), which was originally developed for macOS. This repository adapts that project into a Windows 11 application while preserving the upstream history and attribution.
 
-## Credits & license
-
-Built as an open-source study of how tools like **Cluely** and **Interview Coder** work. Modeled on the open-source clones `pickle-com/glass` and `sohzm/cheating-daddy`.
-
-**License: [GPL-3.0-or-later](LICENSE).**
+Licensed under [GPL-3.0-or-later](LICENSE). If you distribute a compiled build, retain the license and modification notices and provide the corresponding source code.
