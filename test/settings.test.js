@@ -28,3 +28,11 @@ test('settings updates do not mutate defaults', () => {
   assert.equal(result.apiKeys.openai, 'secret');
   assert.equal(DEFAULTS.apiKeys.openai, '');
 });
+
+test('retired Gemini models migrate for existing users', () => {
+  const result = applyPatch(DEFAULTS, {
+    models: { gemini: { fast: 'gemini-2.5-flash', smart: 'gemini-2.5-pro' } }
+  });
+  assert.equal(result.models.gemini.fast, 'gemini-3.1-flash-lite');
+  assert.equal(result.models.gemini.smart, 'gemini-3.5-flash');
+});

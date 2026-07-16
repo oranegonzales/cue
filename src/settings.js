@@ -1,4 +1,10 @@
 const PROVIDERS = ['openai', 'anthropic', 'gemini'];
+const MODEL_MIGRATIONS = {
+  gemini: {
+    'gemini-2.5-flash': 'gemini-3.1-flash-lite',
+    'gemini-2.5-pro': 'gemini-3.5-flash'
+  }
+};
 const DEFAULTS = {
   provider: 'openai',
   smart: false,
@@ -7,7 +13,7 @@ const DEFAULTS = {
   models: {
     openai: { fast: 'gpt-4o-mini', smart: 'gpt-4o' },
     anthropic: { fast: 'claude-haiku-4-5', smart: 'claude-sonnet-5' },
-    gemini: { fast: 'gemini-2.5-flash', smart: 'gemini-2.5-pro' }
+    gemini: { fast: 'gemini-3.1-flash-lite', smart: 'gemini-3.5-flash' }
   },
   sttModel: 'gpt-4o-mini-transcribe'
 };
@@ -19,6 +25,13 @@ function clone(value) {
 function cleanText(value, fallback = '', limit = 10000) {
   if (typeof value !== 'string') return fallback;
   return value.slice(0, limit);
+}
+
+function cleanModel(provider, value, fallback) {
+  const model = cleanText(value, fallback, 200).trim();
+  return MODEL_MIGRATIONS[provider] && MODEL_MIGRATIONS[provider][model]
+    ? MODEL_MIGRATIONS[provider][model]
+    : model;
 }
 
 function applyPatch(current, patch) {
@@ -39,10 +52,10 @@ function applyPatch(current, patch) {
       const models = input.models[provider];
       if (!models || typeof models !== 'object' || Array.isArray(models)) continue;
       if (Object.prototype.hasOwnProperty.call(models, 'fast')) {
-        next.models[provider].fast = cleanText(models.fast, next.models[provider].fast, 200).trim();
+        next.models[provider].fast = cleanModel(provider, models.fast, next.models[provider].fast);
       }
       if (Object.prototype.hasOwnProperty.call(models, 'smart')) {
-        next.models[provider].smart = cleanText(models.smart, next.models[provider].smart, 200).trim();
+        next.models[provider].smart = cleanModel(provider, models.smart, next.models[provider].smart);
       }
     }
   }

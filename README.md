@@ -31,8 +31,8 @@
 
 The Windows workflow produces two x64 files:
 
-- `cue-windows-11-0.2.0-x64.exe` for a normal per-user installation
-- `cue-windows-11-0.2.0-x64.zip` for a portable copy
+- `cue-windows-11-0.2.1-x64.exe` for a normal per-user installation
+- `cue-windows-11-0.2.1-x64.zip` for a portable copy
 
 The builds are unsigned until a Windows code-signing certificate is configured. Windows SmartScreen may therefore show an unrecognized-app warning. Only run a build from a repository and commit you trust.
 

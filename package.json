@@ -1,6 +1,6 @@
 {
   "name": "cue-windows",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Windows 11 AI overlay with screen context, microphone input, and system-audio loopback.",
   "license": "GPL-3.0-or-later",
   "author": "cue contributors",
